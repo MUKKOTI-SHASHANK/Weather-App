@@ -4,7 +4,7 @@ import InputData from "./components/Inputdata";
 import TimeAndLocationDetails from "./components/TimeAndLocationDetails";
 import TempDetails from "./components/TempDetails";
 import ForecastDetails from "./components/ForecastDetails";
-import getFormattedWeatherData from "./components/weatherService";
+import getFormattedWeatherData from "./components/weatherforcast";
 import { useEffect, useState } from "react";
 
 function App() {

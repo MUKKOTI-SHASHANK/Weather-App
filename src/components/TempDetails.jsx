@@ -2,7 +2,7 @@ import React from "react";
 import {
   UilSun,
 } from "@iconscout/react-unicons";
-import {iconUrlFromCode } from "./weatherService";
+import {iconUrlFromCode } from "./weatherforcast";
 
 function TempDetails({
   weather: {
