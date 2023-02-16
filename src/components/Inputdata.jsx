@@ -26,6 +26,7 @@ function InputData({ setQuery}) {
     <div className="flex flex-row justify-center my-12">
       <div className="flex space-x-5 ">
         <input
+          className="text-black"
           value={Place}
           onChange={(e) => setPlace(e.target.value)}
           type="text"
