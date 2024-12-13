@@ -101,90 +101,63 @@ import { DateTime } from "luxon";
 
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
-// Function to fetch weather data
+// Function to fetch weather data based on the type of info (e.g., 'weather' or 'forecast')
 const getWeatherData = (infoType, searchParams) => {
   const url = new URL(BASE_URL + "/" + infoType);
   url.search = new URLSearchParams({ ...searchParams, appid: 'e664f5d3feba085980a2d1a3ea7507ff' });
-  
   return fetch(url).then((res) => res.json());
 };
 
-// Format current weather data
-const formatCurrentWeather = (data) => {
-  const {
-    coord: { lat, lon },
-    main: { temp, temp_min, temp_max },
-    name,
-    dt,
-    sys: { country },
-    weather,
-  } = data;
-
-  const { main: icon } = weather[0];
-
-  return {
-    lat,
-    lon,
-    temp,
-    temp_min,
-    temp_max,
-    name,
-    dt,
-    country,
-    icon,
-  };
-};
-
-// Format forecast weather data (5 days, 3-hour intervals)
+// Format the forecast data
 const formatForecastWeather = (data) => {
-  let { timezone, daily, list } = data;
+  if (!data || !data.daily || !data.hourly) {
+    console.error("Forecast data is missing daily or hourly fields", data);
+    return { daily: [], hourly: [] };  // Return empty arrays if no data available
+  }
 
-  // Format daily forecast (next 7 days)
-  daily = daily.slice(1, 8).map((day) => {
+  let { daily, hourly } = data;
+
+  // Slice daily data (only if available)
+  daily = Array.isArray(daily) ? daily.slice(1, 8).map((day) => {
     return {
-      title: formatToLocalTime(day.dt, timezone, "cccc"),
+      title: formatToLocalTime(day.dt, data.timezone, "cccc"),
       temp: day.temp.day,
       icon: day.weather[0].icon,
     };
-  });
+  }) : [];
 
-  // Format hourly forecast (next 10 hours, 3-hour intervals)
-  const hourly = list.slice(0, 4).map((hour) => {
+  // Slice hourly data (only if available)
+  hourly = Array.isArray(hourly) ? hourly.slice(1, 12).map((day) => {
     return {
-      title: formatToLocalTime(hour.dt, timezone, "hh:mm a"),
-      temp: hour.main.temp,
-      icon: hour.weather[0].icon,
+      title: formatToLocalTime(day.dt, data.timezone, "hh:mm a"),
+      temp: day.temp,
+      icon: day.weather[0].icon,
     };
-  });
+  }) : [];
 
-  return { timezone, daily, hourly };
+  return { daily, hourly };
 };
 
-// Get formatted weather data (current weather + forecast)
-const getFormattedWeatherData = async (searchParams) => {
-  const formattedCurrentWeather = await getWeatherData("weather", searchParams)
-    .then(formatCurrentWeather);
-
-  const { lat, lon } = formattedCurrentWeather;
+// Main function to get forecast weather data
+const getFormattedForecastData = async (searchParams) => {
+  const { lat, lon } = searchParams;
 
   const formattedForecastWeather = await getWeatherData("forecast", {
     lat,
     lon,
-    exclude: "current,minutely,alerts",  // Adjust for your needs (exclude current, minutely, alerts)
+    exclude: "current,minutely,alerts", // You can adjust the `exclude` parameter as needed
     units: searchParams.units,
   }).then(formatForecastWeather);
 
-  return { ...formattedCurrentWeather, ...formattedForecastWeather };
+  return formattedForecastWeather;
 };
 
-// Function to format timestamp to local time
+// Helper function to format time
 const formatToLocalTime = (secs, zone, format = "cccc, dd LLL yyyy' | Local time: 'hh:mm a") =>
   DateTime.fromSeconds(secs).setZone(zone).toFormat(format);
 
-// Function to get icon URL from icon code
-const iconUrlFromCode = (code) =>
-  `http://openweathermap.org/img/wn/${code}@2x.png`;
+// Icon URL generator
+const iconUrlFromCode = (code) => `http://openweathermap.org/img/wn/${code}@2x.png`;
 
-export default getFormattedWeatherData;
-
+export default getFormattedForecastData;
 export { formatToLocalTime, iconUrlFromCode };
