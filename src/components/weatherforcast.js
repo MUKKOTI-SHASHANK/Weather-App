@@ -2,7 +2,9 @@ import { DateTime } from "luxon";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 const getWeatherData = (infoType, searchParams) => {
   const url = new URL(BASE_URL + "/" + infoType);
-  url.search = new URLSearchParams({ ...searchParams, appid: '1fa9ff4126d95b8db54f3897a208e91c' });
+  url.search = new URLSearchParams({ ...searchParams, appid: 'e664f5d3feba085980a2d1a3ea7507ff' });
+  //e664f5d3feba085980a2d1a3ea7507ff
+  //1fa9ff4126d95b8db54f3897a208e91c (Old)
 
   return fetch(url).then((res) => res.json());
 };
